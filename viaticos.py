@@ -268,14 +268,18 @@ class MainWindow(QMainWindow):
         sumas_row_inicial = "5"
         sumas_column_inicial = 14
         suma_total = 0
-        worksheet.write(sumas_row-1, sumas_column_inicial+1,'Total')
-        worksheet.write(sumas_row-1, sumas_column_inicial+2,'Alimentos')
-        worksheet.write(sumas_row-1, sumas_column_inicial+3,'Hospedaje')
-        worksheet.write(sumas_row-1, sumas_column_inicial+4,'Transportacion')
-        worksheet.write(sumas_row-1, sumas_column_inicial+5,'Otros')
+        format = workbook.add_format()
+
+        format.set_pattern(1)
+        format.set_bg_color('#d3d3d3')
+        worksheet.write(sumas_row-1, sumas_column_inicial+1,'Total', format)
+        worksheet.write(sumas_row-1, sumas_column_inicial+2,'Alimentos', format)
+        worksheet.write(sumas_row-1, sumas_column_inicial+3,'Hospedaje', format)
+        worksheet.write(sumas_row-1, sumas_column_inicial+4,'Transportacion', format)
+        worksheet.write(sumas_row-1, sumas_column_inicial+5,'Otros', format)
         for key, value in dicc_users.items():
             self.ui.textBrowser.append(key+": "+ str(value))
-            worksheet.write(sumas_row, sumas_column_inicial,     key)
+            worksheet.write(sumas_row, sumas_column_inicial,     key, format)
             #worksheet.write(sumas_row, 5,     value)
             worksheet.write(sumas_row, sumas_column_inicial+1,     '=SUMIF(A2:A'+str(sumRow)+',"'+key+'",F2:F'+str(sumRow)+')')
             worksheet.write(sumas_row, sumas_column_inicial+2,     '=SUMIFS(F2:F'+str(sumRow)+',A2:A'+str(sumRow)+',"'+key+'",E2:E'+str(sumRow)+',"Alimentos")')

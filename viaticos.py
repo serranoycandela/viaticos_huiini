@@ -3,15 +3,9 @@ import xml.etree.ElementTree as etree
 import os
 import xlsxwriter
 import sys
-
-
-
 from PySide2.QtCore import Qt
 from PySide2 import QtGui, QtCore, QtWidgets
-
-
-
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QWidget, QTableWidget,QTableWidgetItem,QPushButton,QListView,QAbstractItemView,QTreeView
+from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, QWidget, QTableWidget,QTableWidgetItem,QPushButton,QListView,QAbstractItemView,QTreeView,QMessageBox
 from PySide2.QtCore import QFile, QRect
 from PySide2.QtGui import QIcon
 from gui import Ui_MainWindow
@@ -23,6 +17,7 @@ from openpyxl import load_workbook,  Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font
 from openpyxl.worksheet.datavalidation import DataValidation
+from FacturasLocal import FacturaLocal as Factura
 
 # pyside2-uic gui.ui -o gui.py
 #C:\Users\arabela\Anaconda3\Scripts\pyinstaller --noconsole viaticos.spec
@@ -32,67 +27,11 @@ class EditPersonasDialog(QWidget):
     def __init__(self):
         QWidget.__init__(self)
 
-        # self.tabla = QTableWidget(self)
-        # self.tabla.setColumnCount(1)
-        #
-        # self.tabla.setColumnWidth(0,150)
-        # self.tabla.setHorizontalHeaderItem (0, QTableWidgetItem("Personas"))
-        # self.guardar = QPushButton("Gardar",self)
-        # self.guardar.clicked.connect(self.guardarPersonas)
         try:
             self.dirPath = dirname(abspath(__file__))
         except NameError:  # We are the main py2exe script, not a module
             self.dirPath = dirname(abspath(sys.argv[0]))
 
-        # with open(join(self.dirPath,'personas.json')) as p:
-        #     personas = json.load(p)
-        #
-        #
-        # self.tabla.setRowCount(len(personas)+5)
-        # row = -1
-        # for persona in personas:
-        #     row += 1
-        #     self.tabla.setItem(row, 0, QTableWidgetItem(persona))
-        #self.lista_personas.setItem(1, 0, newItem)
-
-
-    # def guardarPersonas(self):
-    #     personas = []
-    #     for row in range(self.tabla.rowCount()):
-    #         print (row)
-    #         if self.tabla.item(row,0):
-    #             print ("agregando: ", self.tabla.item(row,0).text())
-    #             personas.append(self.tabla.item(row,0).text())
-    #
-    #     with open(join(self.dirPath,'personas.json'), 'w') as p:
-    #         json.dump(personas, p)
-    #     self.close()
-
-
-# class EditProyectosDialog(QWidget):
-#     def __init__(self):
-#         QWidget.__init__(self)
-#         self.tabla = QTableWidget(self)
-#         self.tabla.setColumnCount(1)
-#
-#         self.tabla.setColumnWidth(0,150)
-#         self.tabla.setHorizontalHeaderItem (0, QTableWidgetItem("Proyectos"))
-#
-#         try:
-#             dirPath = dirname(abspath(__file__))
-#         except NameError:  # We are the main py2exe script, not a module
-#             dirPath = dirname(abspath(sys.argv[0]))
-#
-#         with open(join(dirPath,'proyectos.json')) as p:
-#             proyectos = json.load(p)
-#
-#
-#         self.tabla.setRowCount(len(proyectos)+5)
-#         row = -1
-#         for proyecto in proyectos[1:]:
-#             row += 1
-#             self.tabla.setItem(row, 0, QTableWidgetItem(proyecto))
-#         #self.lista_personas.setItem(1, 0, newItem)
 
 
 class MainWindow(QMainWindow):
@@ -102,6 +41,8 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.input_carpeta.clicked.connect(self.cualCarpeta)
+        self.ui.carpeta_personal.clicked.connect(self.prellenar_formato)
+        self.ui.excel_button.clicked.connect(self.abre_excel)
         try:
             self.dirPath = dirname(abspath(__file__))
         except NameError:  # We are the main py2exe script, not a module
@@ -116,22 +57,9 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.setColumnWidth(5,70)#otros
         #header = self.tableWidget.verticalHeader()
         self.ponEncabezado()
+        self.dicc_users = {}
+        self.dicc_viajes = {}
 
-        #self.proyectos = ["","Papiit", "Consolidacion", "Fomix", "Binacional", "Otros"]
-        # self.leerPersonas()
-        # self.leerProyectos()
-        # self.ui.tableWidget.setColumnCount(1)
-        #
-        # self.ui.tableWidget.setColumnWidth(0,100)
-        #
-        # #self.personas = ["Daniela", "Edith", "Rodrigo", "Fidel", "Ileana", "Luis", "Nadia", "Paola", "Victor", "Yosune", "Rocio", "Bertha"]
-        # self.ui.proyecto_box.addItems(self.proyectos)
-        # self.ui.proyecto_box.currentIndexChanged.connect(self.seleccionaProyecto)
-        # self.ui.actionAgregar_o_quitar_personas.triggered.connect(self.editPersonas)
-        # self.ui.actionAgregar_o_quitar_proyectos.triggered.connect(self.editProyectos)
-        # self.ui.cancelarButton.clicked.connect(self.cancelaEditar)
-        # self.ui.guardarButton.clicked.connect(self.guarda)
-        # self.ui.editFrame.hide()
     def esteItem(self, text, tooltip):
         item = QTableWidgetItem(text)
         item.setToolTip(tooltip)
@@ -148,72 +76,90 @@ class MainWindow(QMainWindow):
 
         return(tipo)
 
-    # def cancelaEditar(self):
-    #     self.ui.editFrame.hide()
-    # def leerPersonas(self):
-    #     with open(join(self.dirPath,'personas.json')) as p:
-    #         self.personas = json.load(p)
-    # def leerProyectos(self):
-    #     with open(join(self.dirPath,'proyectos.json')) as p:
-    #         self.proyectos = json.load(p)
-    # def editPersonas(self):
-    #     print("editaria personas")
-    #
-    #     self.ui.editFrame.show()
-    #     self.ui.tableWidget.setRowCount(0)
-    #     self.ui.tableWidget.setHorizontalHeaderItem (0, QTableWidgetItem("Personas"))
-    #     self.ui.tableWidget.setRowCount(len(self.personas)+5)
-    #     row = -1
-    #     for persona in self.personas:
-    #         row += 1
-    #         self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(persona))
-    # def editProyectos(self):
-    #     self.ui.editFrame.show()
-    #     self.ui.tableWidget.setRowCount(0)
-    #     self.ui.tableWidget.setHorizontalHeaderItem (0, QTableWidgetItem("Proyectos"))
-    #     self.ui.tableWidget.setRowCount(len(self.proyectos)+5)
-    #     row = -1
-    #     for proyecto in self.proyectos[1:]:
-    #         row += 1
-    #         self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(proyecto))
-    #
-    # def guarda(self):
-    #     if self.ui.tableWidget.horizontalHeaderItem(0).text() == "Personas":
-    #         self.guardaPersonas()
-    #     elif self.ui.tableWidget.horizontalHeaderItem(0).text() == "Proyectos":
-    #         self.guardaProyectos()
-    # def guardaPersonas(self):
-    #     print("aqui guardaria personas")
-    #
-    #     self.personas = []
-    #     for row in range(self.ui.tableWidget.rowCount()):
-    #         print (row)
-    #         if self.ui.tableWidget.item(row,0):
-    #             if len(self.ui.tableWidget.item(row,0).text())>0:
-    #                 print ("agregando: ", self.ui.tableWidget.item(row,0).text())
-    #                 self.personas.append(self.ui.tableWidget.item(row,0).text())
-    #
-    #     with open(join(self.dirPath,'personas.json'), 'w') as p:
-    #         json.dump(self.personas, p)
-    #     self.ui.editFrame.hide()
-    # def guardaProyectos(self):
-    #     print("aqui guardaria proyectos")
-    #     self.proyectos = [""]
-    #     for row in range(self.ui.tableWidget.rowCount()):
-    #         print (row)
-    #         if self.ui.tableWidget.item(row,0):
-    #             if len(self.ui.tableWidget.item(row,0).text())>0:
-    #                 print ("agregando: ", self.ui.tableWidget.item(row,0).text())
-    #                 self.proyectos.append(self.ui.tableWidget.item(row,0).text())
-    #
-    #     with open(join(self.dirPath,'proyectos.json'), 'w') as p:
-    #         json.dump(self.proyectos, p)
-    #     self.ui.editFrame.hide()
-    #     self.ui.proyecto_box.clear()
-    #     self.ui.proyecto_box.addItems(self.proyectos)
-    #
-    # def seleccionaProyecto(self):
-    #     self.ui.input_carpeta.setEnabled(True)
+
+    def abre_excel(self):
+        try:
+            os.startfile(self.xlsx_path)
+        except:
+            QMessageBox.information(self, "Information", "El sistema no tiene una aplicación por default para abrir exceles" )
+
+    def prellenar_formato(self):
+        self.ui.textBrowser.clear()
+        self.ui.tableWidget.clear()
+        self.ui.tableWidget.repaint()
+        self.ponEncabezado()
+        self.ui.tableWidget.setRowCount(6)
+        self.ui.tableWidget.repaint()
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.DirectoryOnly)
+        file_dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+        file_view = file_dialog.findChild(QListView, 'listView')
+        if file_dialog.exec():
+            path = file_dialog.selectedFiles()[0]
+
+        empleado_folder = os.path.split(path)[1]
+
+        viaje_folder = os.path.split(os.path.split(path)[0])[1]
+
+
+        home = os.path.expanduser('~')
+        template_folder = os.path.join(home, 'Documents', 'huiini')
+        wb_template = load_workbook(os.path.join(template_folder,"FORMATO_template.xlsx"))
+        ws_template = wb_template[wb_template.get_sheet_names()[0]]
+
+
+        self.xlsx_path = os.path.join(path,"FORMATO_"+empleado_folder.replace(" ","-")+"_"+viaje_folder.replace(" ","-")+".xlsx")
+
+
+        row_f = 11
+        #folder = os.path.split(path)[1]
+        por_tipo={"Total":0,"Transporte":0,"Alimentos":0,"Hospedaje":0,"Otros":0}
+        hay_facturas = False
+        for archivo in os.listdir(path):
+            if archivo.endswith(".xml"):
+                row_f += 1
+                xml_path = os.path.join(path,archivo)
+                factura = Factura(xml_path)
+                total = factura.total
+                iva = factura.traslados["IVA"]["importe"]
+                uuid = factura.UUID
+                fecha = factura.fechaTimbrado.split("T")[0]
+                provedor = factura.EmisorNombre
+                clave_ps = factura.conceptos[0]['clave_concepto']
+                tipo = self.tipo_de_gasto(clave_ps)
+                ws_template.cell(row_f, 1,    fecha)#fecha
+                ws_template.cell(row_f, 2,    uuid)#fecha
+                ws_template.cell(row_f, 3,    tipo)#tipo
+                ws_template.cell(row_f, 4,    provedor)#provedor
+                ws_template.cell(row_f, 5,    factura.subTotal )#importe
+                ws_template.cell(row_f, 6,    iva)#traslado_iva
+                ws_template.cell(row_f, 7,    total)
+                por_tipo[tipo]+=total
+                por_tipo["Total"]+=total
+                hay_facturas = True
+
+
+        if hay_facturas:
+            self.ui.textBrowser.append("Procesando: "+empleado_folder+" "+viaje_folder)
+            self.ui.tableWidget.setItem(1,0,self.esteItem(empleado_folder,""))
+            self.ui.tableWidget.setItem(1,1,self.esteItem(str(por_tipo["Total"]),""))
+            self.ui.tableWidget.setItem(1,2,self.esteItem(str(por_tipo["Transporte"]),""))
+            self.ui.tableWidget.setItem(1,3,self.esteItem(str(por_tipo["Hospedaje"]),""))
+            self.ui.tableWidget.setItem(1,4,self.esteItem(str(por_tipo["Alimentos"]),""))
+            self.ui.tableWidget.setItem(1,5,self.esteItem(str(por_tipo["Otros"]),""))
+            try:
+                mes = viaje_folder.split(" ")[1].title()
+                dia = viaje_folder.split(" ")[0]
+            except:
+                mes = ""
+                dia = ""
+            ws_template.cell(5, 7, mes)#dia
+            ws_template.cell(5, 5, dia)#mes
+            self.ui.textBrowser.append("Formato de gastos de viaje creado en: "+self.xlsx_path)
+            wb_template.save(self.xlsx_path)
+            self.ui.excel_button.setEnabled(True)
+        else:
+            QMessageBox.information(self, "Information", "No hay facturas en este folder" )
 
     def ponEncabezado(self):
         self.ui.tableWidget.setHorizontalHeaderItem (0, QTableWidgetItem("Viaje"))
@@ -239,17 +185,36 @@ class MainWindow(QMainWindow):
         if file_dialog.exec():
             paths = file_dialog.selectedFiles()
 
-
-        # esteFileChooser = QFileDialog()
-        # esteFileChooser.setFileMode(QFileDialog.Directory)
-        # if esteFileChooser.exec_():
-        #     self.ui.textBrowser.clear()
-        #     self.esteFolder = esteFileChooser.selectedFiles()[0] + "/"
-        #
-        #     self.procesaCarpeta(self.esteFolder)
         self.procesaCarpetas(paths)
 
+
+    def procesa_formato(self,excel_path,usuario,vieje_folder):
+        fromato_wb = load_workbook(excel_path, data_only=True)
+        ws = fromato_wb[fromato_wb.get_sheet_names()[0]]
+
+        for f_row in range(12,47):
+            total = ws.cell(f_row,7).value
+            if not total == None:
+                self.row += 1
+                fecha = ws.cell(f_row,1).value
+                nombre = ws.cell(f_row,2).value
+                tipo = ws.cell(f_row,3).value
+                self.dicc_users[usuario] += float(total)
+                self.dicc_viajes[vieje_folder]["Total"] += total
+                self.dicc_viajes[vieje_folder][tipo] += total
+                self.worksheet.cell(self.row, 1,     usuario)
+                self.worksheet.cell(self.row, 2,     vieje_folder)
+                cell_fecha = self.worksheet.cell(self.row, 3)
+                cell_fecha.value = fecha
+                cell_fecha.number_format = 'dd/mm/YYYY'
+                self.worksheet.cell(self.row, 4,     nombre)
+                #################worksheet.data_validation('E'+str(row+1), {'validate': 'list', 'source': ['Alimentos', 'Hospedaje', 'Transporte', 'Otros']})
+                self.worksheet.cell(self.row, 5,     tipo)
+                self.worksheet.cell(self.row, 6,     total)
+
+
     def procesaCarpetas(self,paths):
+        self.ui.textBrowser.clear()
         self.ui.tableWidget.clear()
         self.ui.tableWidget.repaint()
         self.ponEncabezado()
@@ -257,12 +222,12 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.repaint()
         head = os.path.split(paths[0])[0]
         tail = os.path.split(head)[1]
-        self.ui.tableWidget.setItem(1,1,self.esteItem("kk","kkkkkk"))
-        print(head)
 
-        xlsx_path = os.path.join(head,"resumen_"+tail+".xlsx")
-        if os.path.isfile(xlsx_path):
-            workbook = load_workbook(xlsx_path)
+        #print(head)
+
+        self.xlsx_path = os.path.join(head,"resumen_"+tail+".xlsx")
+        if os.path.isfile(self.xlsx_path):
+            workbook = load_workbook(self.xlsx_path)
             ws_empleados = workbook["Empleados"]
             ws_viajes = workbook["Viajes"]
         else:
@@ -288,45 +253,20 @@ class MainWindow(QMainWindow):
             sheet1 = workbook[sheet1_name]
             workbook.remove_sheet(sheet1)
             ws_empleados.column_dimensions[get_column_letter(1)].width = 24
-            ws_empleados['B1'].alignment=Alignment(horizontal='center',
-                     vertical='center',
-                     text_rotation=0,
-                     wrap_text=True,
-                     shrink_to_fit=False,
-                     indent=0)
+            ws_empleados['B1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
             ws_empleados.column_dimensions[get_column_letter(2)].width = 12
             ws_empleados.cell(1, 2, "ANTICIPO")
-            ws_empleados['C1'].alignment=Alignment(horizontal='center',
-                     vertical='center',
-                     text_rotation=0,
-                     wrap_text=True,
-                     shrink_to_fit=False,
-                     indent=0)
+            ws_empleados['C1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
             # ws_empleados['C1'].alignment = Alignment(wrap_text=True)
             # ws_empleados["C1"].alignment.vertical = "center"
             ws_empleados['C1'].value = "TOTAL\nGASTO"
             ws_empleados.column_dimensions[get_column_letter(4)].width = 17
-            ws_empleados['D1'].alignment=Alignment(horizontal='center',
-                     vertical='center',
-                     text_rotation=0,
-                     wrap_text=True,
-                     shrink_to_fit=False,
-                     indent=0)
+            ws_empleados['D1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
             ws_empleados['D1'].value = "SALDO\nPARA\nMETROPOLITANA"
             ws_empleados.column_dimensions[get_column_letter(5)].width = 16
-            ws_empleados['E1'].alignment=Alignment(horizontal='center',
-                     vertical='center',
-                     text_rotation=0,
-                     wrap_text=True,
-                     shrink_to_fit=False,
-                     indent=0)
+            ws_empleados['E1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
             ws_empleados['E1'] = "SALDO\nA FAVOR\nEMPLEADO"
-            ws_empleados['F1'].alignment=Alignment(horizontal='center',
-                     vertical='center',
-                     text_rotation=0,
-                     wrap_text=True,
-                     shrink_to_fit=False,
-                     indent=0)
+            ws_empleados['F1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
             ws_empleados.cell(1, 6, "BALANCE")
             #FFE082
             ws_empleados.cell(1, 2).fill = PatternFill(start_color="FFE082", fill_type = "solid")
@@ -339,31 +279,34 @@ class MainWindow(QMainWindow):
 
         self.ui.textBrowser.append("Carpeta: "+ head)
         lista_carpetas_personales = []
+        self.dicc_viajes = {}
         for viaje in paths:
             vieje_folder = os.path.split(viaje)[1]
             if vieje_folder not in workbook.sheetnames:
 
-                worksheet = workbook.create_sheet(vieje_folder)
+                self.worksheet = workbook.create_sheet(vieje_folder)
 
-                worksheet.cell(1, 1,     "Usuario")
-                worksheet.cell(1, 2,     "Viaje")
-                worksheet.cell(1, 3,     "Fecha")
-                worksheet.cell(1, 4,     "Folio facturas")
-                worksheet.cell(1, 5,     "Tipo")
-                worksheet.cell(1, 6,     "Monto")
-                worksheet.column_dimensions[get_column_letter(1)].width = 23
-                worksheet.column_dimensions[get_column_letter(2)].width = 15
-                worksheet.column_dimensions[get_column_letter(5)].width = 10
-                worksheet.column_dimensions[get_column_letter(7)].width = 10
-                worksheet.column_dimensions[get_column_letter(12)].width = 10
-                worksheet.column_dimensions[get_column_letter(13)].width = 10
-                worksheet.column_dimensions[get_column_letter(14)].width = 10
-                worksheet.column_dimensions[get_column_letter(9)].width = 23
+                self.worksheet.cell(1, 1,     "Usuario")
+                self.worksheet.cell(1, 2,     "Viaje")
+                self.worksheet.cell(1, 3,     "Fecha")
+                self.worksheet.cell(1, 4,     "Folio facturas")
+                self.worksheet.cell(1, 5,     "Tipo")
+                self.worksheet.cell(1, 6,     "Monto")
+                self.worksheet.column_dimensions[get_column_letter(1)].width = 23
+                self.worksheet.column_dimensions[get_column_letter(2)].width = 15
+                self.worksheet.column_dimensions[get_column_letter(3)].width = 12
+                self.worksheet.column_dimensions[get_column_letter(5)].width = 10
+                self.worksheet.column_dimensions[get_column_letter(7)].width = 10
+                self.worksheet.column_dimensions[get_column_letter(12)].width = 10
+                self.worksheet.column_dimensions[get_column_letter(13)].width = 10
+                self.worksheet.column_dimensions[get_column_letter(14)].width = 10
+                self.worksheet.column_dimensions[get_column_letter(9)].width = 23
 
-                row = 1
+                self.row = 1
                 suma = 0
                 arch_total=0
-                dicc_users = {}
+                self.dicc_users = {}
+                self.dicc_viajes[vieje_folder]={"Total":0,"Transporte":0,"Alimentos":0,"Hospedaje":0,"Otros":0}
                 for carpeta in os.listdir(viaje):
                     if os.path.isdir(os.path.join(viaje,carpeta)):
                         carpeta_usuario = os.path.join(viaje,carpeta)
@@ -375,39 +318,43 @@ class MainWindow(QMainWindow):
                         #viaje = carpeta_usuario.split("")
                         self.ui.textBrowser.append("Procesando: "+ usuario)
                         suma_user=0
-                        dicc_users[usuario]=0
+                        self.dicc_users[usuario]=0
+                        excel_path = ""
                         for archivo in os.listdir(carpeta_usuario):
-                            if archivo.endswith(".xml"):
-                                arch_total+=1
-                                nombre = archivo.split(".")[0]
-                                if len(nombre) > 5:
-                                    nombre = nombre[-5:]
-                                row += 1
-                                xml_path = os.path.join(carpeta_usuario,archivo)
-                                tree = etree.parse(xml_path)
-                                root = tree.getroot()
-                                total = float(root.get("Total"))
-                                dicc_users[usuario] += total
-                                ComplementoTag = root.find("{http://www.sat.gob.mx/cfd/3}Complemento")
-                                TimbreFiscalDigitalTag = ComplementoTag.find("{http://www.sat.gob.mx/TimbreFiscalDigital}TimbreFiscalDigital")
-                                fechaTimbrado = TimbreFiscalDigitalTag.get("FechaTimbrado").split("T")[0]
-                                conceptosTag = root.find("{http://www.sat.gob.mx/cfd/3}Conceptos")
-                                listaconceptosTag = conceptosTag.findall ("{http://www.sat.gob.mx/cfd/3}Concepto")
-                                primerConceptoTag = listaconceptosTag[0]
-                                descripcion = primerConceptoTag.get("Descripcion")[0:36]
-                                clave_ps = primerConceptoTag.get("ClaveProdServ")
-                                worksheet.cell(row, 1,     usuario)
-                                worksheet.cell(row, 2,     head)
-                                worksheet.cell(row, 3,     fechaTimbrado)
-                                worksheet.cell(row, 4,     nombre)
-                                #################worksheet.data_validation('E'+str(row+1), {'validate': 'list', 'source': ['Alimentos', 'Hospedaje', 'Transporte', 'Otros']})
-                                worksheet.cell(row, 5,     self.tipo_de_gasto(clave_ps))
-                                worksheet.cell(row, 6,     total)
-                                suma+=total
+                            if archivo.endswith(".xlsx") and archivo.startswith("FORMATO"):
+                                excel_path = os.path.join(carpeta_usuario,archivo)
+                                #self.procesa_formato(self,excel_path,usuario,vieje_folder)
+                                self.procesa_formato(excel_path,usuario,vieje_folder)
+                        if excel_path == "":
+                            for archivo in os.listdir(carpeta_usuario):
+                                if archivo.endswith(".xml"):
+                                    arch_total+=1
+                                    self.row += 1
+                                    xml_path = os.path.join(carpeta_usuario,archivo)
+                                    factura = Factura(xml_path)
+                                    total = factura.total
+                                    iva = factura.traslados["IVA"]["importe"]
+                                    uuid = factura.UUID
+                                    fecha = factura.fechaTimbrado.split("T")[0]
+                                    provedor = factura.EmisorNombre
+                                    clave_ps = factura.conceptos[0]['clave_concepto']
+                                    tipo = self.tipo_de_gasto(clave_ps)
+                                    self.dicc_users[usuario] += total
+                                    self.dicc_viajes[vieje_folder]["Total"] += total
+                                    self.dicc_viajes[vieje_folder][self.tipo_de_gasto(clave_ps)] += total
 
-                sumRow = row+1
-                worksheet.cell(sumRow, 5,     "Suma")
-                worksheet.cell(sumRow, 6,     '=SUM(F2:F'+str(row)+')')
+                                    self.worksheet.cell(self.row, 1,     usuario)
+                                    self.worksheet.cell(self.row, 2,     head)
+                                    self.worksheet.cell(self.row, 3,     fecha)
+                                    self.worksheet.cell(self.row, 4,     uuid)
+                                    #################self.worksheet.data_validation('E'+str(row+1), {'validate': 'list', 'source': ['Alimentos', 'Hospedaje', 'Transporte', 'Otros']})
+                                    self.worksheet.cell(self.row, 5,     tipo)
+                                    self.worksheet.cell(self.row, 6,     total)
+                                    suma+=total
+
+                sumRow = self.row + 1
+                self.worksheet.cell(sumRow, 5,     "Suma")
+                self.worksheet.cell(sumRow, 6,     '=SUM(F2:F'+str(self.row)+')')
                 #sumas_row = sumRow + 2
                 #sumas_row_inicial = str(sumRow + 2)
                 sumas_row = 2
@@ -419,72 +366,41 @@ class MainWindow(QMainWindow):
                 #format.set_pattern(1)
                 #format.set_bg_color('#d3d3d3')
 
-                worksheet.column_dimensions[get_column_letter(1)].width = 24
-                worksheet['J1'].alignment=Alignment(horizontal='center',
-                         vertical='center',
-                         text_rotation=0,
-                         wrap_text=True,
-                         shrink_to_fit=False,
-                         indent=0)
-                worksheet.column_dimensions[get_column_letter(10)].width = 12
-                worksheet.cell(1, 10, "ANTICIPO")
-                worksheet['K1'].alignment=Alignment(horizontal='center',
-                         vertical='center',
-                         text_rotation=0,
-                         wrap_text=True,
-                         shrink_to_fit=False,
-                         indent=0)
-                worksheet['K1'].value = "TOTAL\nGASTO"
-                worksheet.column_dimensions[get_column_letter(11)].width = 12
-                worksheet['L1'].alignment=Alignment(horizontal='center',
-                         vertical='center',
-                         text_rotation=0,
-                         wrap_text=True,
-                         shrink_to_fit=False,
-                         indent=0)
-                worksheet['L1'].value = "SALDO\nPARA\nMETROPOLITANA"
-                worksheet.column_dimensions[get_column_letter(12)].width = 16
-                worksheet['M1'].alignment=Alignment(horizontal='center',
-                         vertical='center',
-                         text_rotation=0,
-                         wrap_text=True,
-                         shrink_to_fit=False,
-                         indent=0)
-                worksheet['M1'] = "SALDO\nA FAVOR\nEMPLEADO"
-                worksheet.column_dimensions[get_column_letter(13)].width = 15
-                worksheet['N1'].alignment=Alignment(horizontal='center',
-                         vertical='center',
-                         text_rotation=0,
-                         wrap_text=True,
-                         shrink_to_fit=False,
-                         indent=0)
-                worksheet['N1'] = "Estatus"
-                worksheet.cell(1, 10).fill = PatternFill(start_color="FFE082", fill_type = "solid")
-                worksheet.cell(1, 11).fill = PatternFill(start_color="FFE082", fill_type = "solid")
-                worksheet.cell(1, 12).fill = PatternFill(start_color="FFE082", fill_type = "solid")
-                worksheet.cell(1, 13).fill = PatternFill(start_color="FFE082", fill_type = "solid")
-                worksheet.cell(1, 14).fill = PatternFill(start_color="FFE082", fill_type = "solid")
+                self.worksheet.column_dimensions[get_column_letter(1)].width = 24
+                self.worksheet['J1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
+                self.worksheet.column_dimensions[get_column_letter(10)].width = 12
+                self.worksheet.cell(1, 10, "ANTICIPO")
+                self.worksheet['K1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
+                self.worksheet['K1'].value = "TOTAL\nGASTO"
+                self.worksheet.column_dimensions[get_column_letter(11)].width = 12
+                self.worksheet['L1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
+                self.worksheet['L1'].value = "SALDO\nPARA\nMETROPOLITANA"
+                self.worksheet.column_dimensions[get_column_letter(12)].width = 16
+                self.worksheet['M1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
+                self.worksheet['M1'] = "SALDO\nA FAVOR\nEMPLEADO"
+                self.worksheet.column_dimensions[get_column_letter(13)].width = 15
+                self.worksheet['N1'].alignment=Alignment(horizontal='center',vertical='center',text_rotation=0,wrap_text=True,shrink_to_fit=False,indent=0)
+                self.worksheet['N1'] = "Estatus"
+                self.worksheet.cell(1, 10).fill = PatternFill(start_color="FFE082", fill_type = "solid")
+                self.worksheet.cell(1, 11).fill = PatternFill(start_color="FFE082", fill_type = "solid")
+                self.worksheet.cell(1, 12).fill = PatternFill(start_color="FFE082", fill_type = "solid")
+                self.worksheet.cell(1, 13).fill = PatternFill(start_color="FFE082", fill_type = "solid")
+                self.worksheet.cell(1, 14).fill = PatternFill(start_color="FFE082", fill_type = "solid")
                 dv = DataValidation(type="list", formula1='"Pendiente,Pagado"', allow_blank=True)
-                worksheet.add_data_validation(dv)
-                # worksheet.cell(sumas_row-1, sumas_column_inicial+2,'Alimentos')
-                # worksheet.cell(sumas_row-1, sumas_column_inicial+3,'Hospedaje')
-                # worksheet.cell(sumas_row-1, sumas_column_inicial+4,'Transporte')
-                # worksheet.cell(sumas_row-1, sumas_column_inicial+5,'Otros')
-                for key, value in dicc_users.items():
+                self.worksheet.add_data_validation(dv)
+
+                for key, value in self.dicc_users.items():
                     self.ui.textBrowser.append(key+": "+ str(value))
-                    worksheet.cell(sumas_row, sumas_column_inicial-1, key)
+                    self.worksheet.cell(sumas_row, sumas_column_inicial-1, key)
                     #worksheet.write(sumas_row, 5,     value)
-                    worksheet.cell(sumas_row, sumas_column_inicial+1,     '=SUMIF(A2:A'+str(row)+',"'+key+'",F2:F'+str(row)+')')
+                    self.worksheet.cell(sumas_row, sumas_column_inicial+1,     '=SUMIF(A2:A'+str(self.row)+',"'+key+'",F2:F'+str(self.row)+')')
 
-                    worksheet.cell(sumas_row, sumas_column_inicial+2,     '=IF(N'+str(sumas_row)+'="Pagado",0,IF(J'+str(sumas_row)+'-K'+str(sumas_row)+'>0,J'+str(sumas_row)+'-K'+str(sumas_row)+',0))')#
-                    worksheet.cell(sumas_row, sumas_column_inicial+3,     '=IF(N'+str(sumas_row)+'="Pagado",0,IF(K'+str(sumas_row)+'-J'+str(sumas_row)+'>0,K'+str(sumas_row)+'-J'+str(sumas_row)+',0))')
+                    self.worksheet.cell(sumas_row, sumas_column_inicial+2,     '=IF(N'+str(sumas_row)+'="Pagado",0,IF(J'+str(sumas_row)+'-K'+str(sumas_row)+'>0,J'+str(sumas_row)+'-K'+str(sumas_row)+',0))')#
+                    self.worksheet.cell(sumas_row, sumas_column_inicial+3,     '=IF(N'+str(sumas_row)+'="Pagado",0,IF(K'+str(sumas_row)+'-J'+str(sumas_row)+'>0,K'+str(sumas_row)+'-J'+str(sumas_row)+',0))')
 
-                    dv.add(worksheet.cell(sumas_row, sumas_column_inicial+4))
-                    worksheet.cell(sumas_row, sumas_column_inicial+4,     'Pendiente')
-                    # worksheet.cell(sumas_row, sumas_column_inicial+2,     '=SUMIFS(F2:F'+str(row)+',A2:A'+str(row)+',"'+key+'",E2:E'+str(row)+',"Alimentos")')
-                    # worksheet.cell(sumas_row, sumas_column_inicial+3,     '=SUMIFS(F2:F'+str(row)+',A2:A'+str(row)+',"'+key+'",E2:E'+str(row)+',"Hospedaje")')
-                    # worksheet.cell(sumas_row, sumas_column_inicial+4,     '=SUMIFS(F2:F'+str(row)+',A2:A'+str(row)+',"'+key+'",E2:E'+str(row)+',"Transporte")')
-                    # worksheet.cell(sumas_row, sumas_column_inicial+5,     '=SUMIFS(F2:F'+str(row)+',A2:A'+str(row)+',"'+key+'",E2:E'+str(row)+',"Otros")')
+                    dv.add(self.worksheet.cell(sumas_row, sumas_column_inicial+4))
+                    self.worksheet.cell(sumas_row, sumas_column_inicial+4,     'Pendiente')
+
                     suma_total += value
                     sumas_row += 1
                     ya_estaba = False
@@ -541,10 +457,10 @@ class MainWindow(QMainWindow):
 
                 totales_row_str = str(sumas_row-1)
 
-                worksheet.cell(sumas_row, sumas_column_inicial,     '=SUM(J'+sumas_row_inicial+':J'+totales_row_str+')')
-                worksheet.cell(sumas_row, sumas_column_inicial+1,     '=SUM(K'+sumas_row_inicial+':K'+totales_row_str+')')
-                worksheet.cell(sumas_row, sumas_column_inicial+2,     '=SUM(L'+sumas_row_inicial+':L'+totales_row_str+')')
-                worksheet.cell(sumas_row, sumas_column_inicial+3,     '=SUM(M'+sumas_row_inicial+':M'+totales_row_str+')')
+                self.worksheet.cell(sumas_row, sumas_column_inicial,     '=SUM(J'+sumas_row_inicial+':J'+totales_row_str+')')
+                self.worksheet.cell(sumas_row, sumas_column_inicial+1,     '=SUM(K'+sumas_row_inicial+':K'+totales_row_str+')')
+                self.worksheet.cell(sumas_row, sumas_column_inicial+2,     '=SUM(L'+sumas_row_inicial+':L'+totales_row_str+')')
+                self.worksheet.cell(sumas_row, sumas_column_inicial+3,     '=SUM(M'+sumas_row_inicial+':M'+totales_row_str+')')
 
 
                 self.ui.textBrowser.append("Total: "+str(suma_total))
@@ -612,10 +528,40 @@ class MainWindow(QMainWindow):
         ws_viajes.cell(n_viaje+1,5,"=SUM(E2:E"+str(n_viaje)+")")
         ws_viajes.cell(n_viaje+1,6,"=SUM(F2:F"+str(n_viaje)+")")
         ws_viajes.cell(n_viaje+1,7,"=SUM(G2:G"+str(n_viaje)+")")
-        workbook.save(xlsx_path)
-        # data = load_workbook(xlsx_path, data_only=True)
-        # print("------------------------"+str(data["Viajes"].cell(2,4).value))
-        self.ui.textBrowser.append("Resumen: "+xlsx_path)
+
+        workbook.save(self.xlsx_path)
+        self.ui.excel_button.setEnabled(True)
+        v_row = 1
+        sumaTotal = 0
+        sumaTransporte = 0
+        sumaHospedaje = 0
+        sumaAlimentos = 0
+        sumaOtros = 0
+        if len(self.dicc_viajes.items()) > 4:
+            self.ui.tableWidget.setRowCount(len(self.dicc_viajes.items())+2)
+        for key, value in self.dicc_viajes.items():
+
+            sumaTotal += value["Total"]
+            sumaTransporte += value["Transporte"]
+            sumaHospedaje += value["Hospedaje"]
+            sumaAlimentos += value["Alimentos"]
+            sumaOtros += value["Otros"]
+            self.ui.tableWidget.setItem(v_row,0,self.esteItem(key,key))
+            self.ui.tableWidget.setItem(v_row,1,self.esteItem(str(value["Total"]),""))
+            self.ui.tableWidget.setItem(v_row,2,self.esteItem(str(value["Transporte"]),""))
+            self.ui.tableWidget.setItem(v_row,3,self.esteItem(str(value["Hospedaje"]),""))
+            self.ui.tableWidget.setItem(v_row,4,self.esteItem(str(value["Alimentos"]),""))
+            self.ui.tableWidget.setItem(v_row,5,self.esteItem(str(value["Otros"]),""))
+            v_row += 1
+        print("total ",sumaTotal)
+        print("Transporte ",sumaTransporte)
+        self.ui.tableWidget.setItem(v_row,1,self.esteItem(str(sumaTotal),""))
+        self.ui.tableWidget.setItem(v_row,2,self.esteItem(str(sumaTransporte),""))
+        self.ui.tableWidget.setItem(v_row,3,self.esteItem(str(sumaHospedaje),""))
+        self.ui.tableWidget.setItem(v_row,4,self.esteItem(str(sumaAlimentos),""))
+        self.ui.tableWidget.setItem(v_row,5,self.esteItem(str(sumaOtros),""))
+        self.ui.textBrowser.append("Resumen: "+self.xlsx_path)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

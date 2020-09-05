@@ -20,6 +20,7 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
+LicenseFile=C:\Users\arabela\Documents\GitHub\viaticos_huiini\LICENSE
 DisableProgramGroupPage=yes
 OutputBaseFilename=viaticos_installer
 Compression=lzma
@@ -32,9 +33,11 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\dist\viaticos.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\personas.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\proyectos.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\dist\viaticos\viaticos.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\dist\viaticos\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\arabela\Documents\huiini\FORMATO_template.xlsx"; DestDir: "{userdocs}\huiini"; Flags: ignoreversion
+Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\datos_prueba\*"; DestDir: "{userdocs}\huiini\datos_prueba"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\arabela\Documents\GitHub\viaticos_huiini\logo.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

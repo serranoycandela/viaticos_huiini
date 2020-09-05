@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'gui.ui',
 # licensing of 'gui.ui' applies.
 #
-# Created: Wed Sep  2 11:17:42 2020
+# Created: Fri Sep  4 12:51:50 2020
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,9 +43,7 @@ class Ui_MainWindow(object):
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_2.setObjectName("frame_2")
         self.splitter = QtWidgets.QSplitter(self.frame_2)
-        self.splitter.setGeometry(QtCore.QRect(10, 10, 381, 401))
-        self.splitter.setMinimumSize(QtCore.QSize(150, 0))
-        self.splitter.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.splitter.setGeometry(QtCore.QRect(10, 10, 341, 431))
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.splitter.setObjectName("splitter")
         self.input_carpeta = QtWidgets.QPushButton(self.splitter)
@@ -58,6 +56,16 @@ class Ui_MainWindow(object):
         self.input_carpeta.setMinimumSize(QtCore.QSize(0, 30))
         self.input_carpeta.setMaximumSize(QtCore.QSize(16777215, 30))
         self.input_carpeta.setObjectName("input_carpeta")
+        self.carpeta_personal = QtWidgets.QPushButton(self.splitter)
+        self.carpeta_personal.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.carpeta_personal.sizePolicy().hasHeightForWidth())
+        self.carpeta_personal.setSizePolicy(sizePolicy)
+        self.carpeta_personal.setMinimumSize(QtCore.QSize(0, 30))
+        self.carpeta_personal.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.carpeta_personal.setObjectName("carpeta_personal")
         self.label_2 = QtWidgets.QLabel(self.splitter)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -73,6 +81,9 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.textBrowser.sizePolicy().hasHeightForWidth())
         self.textBrowser.setSizePolicy(sizePolicy)
         self.textBrowser.setObjectName("textBrowser")
+        self.excel_button = QtWidgets.QPushButton(self.splitter)
+        self.excel_button.setEnabled(False)
+        self.excel_button.setObjectName("excel_button")
         self.verticalLayout.addWidget(self.frame_2)
         self.horizontalLayout_4.addLayout(self.verticalLayout)
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
@@ -98,8 +109,10 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "Viaticos LANCIS", None, -1))
+        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "Viaticos Huiini", None, -1))
         self.input_carpeta.setText(QtWidgets.QApplication.translate("MainWindow", "Carpeta(s) de Viaje", None, -1))
+        self.carpeta_personal.setText(QtWidgets.QApplication.translate("MainWindow", "Prellenar formato de gastos de viaje", None, -1))
+        self.excel_button.setText(QtWidgets.QApplication.translate("MainWindow", "Abrir excel", None, -1))
         self.actionAgregar_o_quitar_personas.setText(QtWidgets.QApplication.translate("MainWindow", "Agregar o quitar personas", None, -1))
         self.actionAgregar_o_quitar_proyectos.setText(QtWidgets.QApplication.translate("MainWindow", "Agregar o quitar proyectos", None, -1))
 

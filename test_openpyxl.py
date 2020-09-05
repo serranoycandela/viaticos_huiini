@@ -16,3 +16,12 @@ viajes = data["Viajes"]
 celda = viajes.cell(2,4)
 valor = celda.value
 print("------------------------"+str(valor))
+import os
+path = os.getenv('LOCALAPPDATA')
+array = os.listdir(path)
+print(path)
+
+pdflatex_path = os.path.join(path,"Programs","MiKTeX","miktex","bin","x64","pdflatex.exe")
+pdflatex_path = pdflatex_path.replace("\\","\\\\")
+print(pdflatex_path)
+print("AAAAAA".title())

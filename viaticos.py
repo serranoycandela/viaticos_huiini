@@ -479,9 +479,17 @@ class MainWindow(QMainWindow):
                     termina_empleado = cell.row - 1
                     termino = True
                     print("termina empleado = " + str(termina_empleado))
+                    resta_metro_str = "'"+vieje_folder+"'!J"+str(sumas_row-1)+"-'"+vieje_folder+"'!K"+str(sumas_row-1)
+
+                    resta_empleado_str = 'SUM(E'+str(empieza_empleado)+':E'+str(termina_empleado)+')-SUM(D'+str(empieza_empleado)+':D'+str(termina_empleado)+')'
+                    saldo_empleado = "=IF("+resta_empleado_str+">0,"+resta_empleado_str+",0)"
+                    resta_metro_str = 'SUM(D'+str(empieza_empleado)+':D'+str(termina_empleado)+')-SUM(E'+str(empieza_empleado)+':E'+str(termina_empleado)+')'
+                    saldo_metro = "=IF("+resta_metro_str+">0,"+resta_metro_str+",0)"
+                    print(str(saldo_metro))
+                    print(str(saldo_empleado))
                     ws_empleados["C"+str(cell.row)].value = '=SUM(C'+str(empieza_empleado)+':C'+str(termina_empleado)+')'
-                    ws_empleados["D"+str(cell.row)].value = '=SUM(D'+str(empieza_empleado)+':D'+str(termina_empleado)+')'
-                    ws_empleados["E"+str(cell.row)].value = '=SUM(E'+str(empieza_empleado)+':E'+str(termina_empleado)+')'
+                    ws_empleados["D"+str(cell.row)].value = saldo_metro
+                    ws_empleados["E"+str(cell.row)].value = saldo_empleado
                     ws_empleados["F"+str(cell.row)].value = '=E'+str(cell.row)+'-D'+str(cell.row)
 
                 if cell.value == None:

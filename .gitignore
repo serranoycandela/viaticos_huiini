@@ -9,3 +9,7 @@
 *.zip
 *.spec
 *.xlsx
+dist/
+build/
+Output/
+

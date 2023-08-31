@@ -11,8 +11,7 @@ import subprocess
 from os.path import join
 import json
 import re
-from pdflatex import PDFLaTeX
-import pdflatex
+
 
 
 class FacturaLocal(object):

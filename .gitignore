@@ -8,8 +8,9 @@
 *.pyz
 *.zip
 *.spec
-*.xlsx
+datos_prueba/
 dist/
 build/
 Output/
+
 
